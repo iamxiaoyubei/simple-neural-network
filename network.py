@@ -1,6 +1,7 @@
 import numpy as np
 import math
 import random
+random.seed(1500)
 def intializeSameWeigths():
     hiddenWeights = [0.5, 0.5, 0.5, 0.5]
     outputWeights = [-0.5, -0.5]
@@ -13,17 +14,16 @@ def intializeRandomWeigths():
         hiddenWeights[i] = random.uniform(-1.0, 1.0)
     for i in range(len(outputWeights)):
         outputWeights[i] = random.uniform(-1.0, 1.0)
+    print("Random Hidden Weights:", hiddenWeights)
+    print("Random Output Weights:", outputWeights)
     return hiddenWeights, outputWeights
 
 class Network:
-    def __init__(self, hiddenWeights, outputWeigths):
+    def __init__(self, hiddenWeights, outputWeights):
         self.hiddenWeights = np.array(hiddenWeights)
-        self.outputWeights = np.array(outputWeigths)
+        self.outputWeights = np.array(outputWeights)
         return 
     
-    def softmax(self, out):
-        return np.exp(out)/sum(np.exp(out))
-
     # calculate MSE loss
     def calculateLoss(self, predict, label):
         return ((predict - label)**2).mean()
@@ -42,14 +42,9 @@ class Network:
         # set input
         self.setInput(data)
         # calculate output from input
-        # print("input:",self.input)
-        # print("self.hiddenWeights:",self.hiddenWeights)
         self.hiddenOutputBeforeActivationFunc = np.dot(self.hiddenWeights, self.input)
-        # print("self.hiddenOutputBeforeActivationFunc:",self.hiddenOutputBeforeActivationFunc)
         self.hiddenOutput = self.sigmoid(self.hiddenOutputBeforeActivationFunc)
-        # print("self.hiddenOutput",self.hiddenOutput)
         self.hiddenOutput = np.insert(self.hiddenOutput, 0, 1)
-        # print("self.hiddenOutput",self.hiddenOutput)
         self.outputBeforeActivationFunc = np.dot(self.outputWeights, self.hiddenOutput)
         self.output = self.sigmoid(self.outputBeforeActivationFunc)
         return self.output
@@ -74,34 +69,21 @@ class Network:
         # partial loss/outputWeights
         partialLossDividedOutputWeights = partialLossDividedOutput * partialOutputDividedOutputWeights
         # partial loss/hiddenWeights
-        # print("output:", self.output)
-        # print("label:",self.label)
-        # print("partialLossDividedOutput ", partialLossDividedOutput)
-        # print("partialOutputDividedHiddenOutput ",partialOutputDividedHiddenOutput)
-        # print("partialHiddenOutputDividedHiddenWeights ", partialHiddenOutputDividedHiddenWeights)
         partialLossDividedHiddenWeights = partialLossDividedOutput * partialOutputDividedHiddenOutput * partialHiddenOutputDividedHiddenWeights
         # gradient descend on outputWeights
         self.outputWeights = self.outputWeights - learningRate * partialLossDividedOutputWeights
         # gradient descend on hiddenWeights
         self.hiddenWeights = self.hiddenWeights - learningRate * partialLossDividedHiddenWeights
-        return
-        
-    # def trainWithSoftmax(self, data, label):
-    #     output = self.forward(data)
-    #     predict = self.softmax(output)
-    #     loss = self.calculateLoss(predict, label)
-    #     self.backpropagation(loss)
-    #     return loss
+        return np.append(partialLossDividedOutputWeights, partialLossDividedHiddenWeights)
 
     def train(self, data, label):
         self.label = np.array(label)
         output = self.forward(data)
-        # print("output:", output)
         loss = self.calculateLoss(output, label)
-        self.backpropagation(loss)
-        return loss
+        gradient = self.backpropagation(loss)
+        return loss, gradient
 
+    # inference
     def inference(self, data):
-        # inference
         output = self.forward(data)
         return np.sign(output)

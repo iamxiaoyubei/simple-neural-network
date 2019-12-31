@@ -16,6 +16,9 @@ def createDataset():
 
 dataset = createDataset()
 plt.figure()
+plt.title("activation function")
+plt.xlabel("net")
+plt.ylabel("f(net)")
 plt.xlim(xmin=-10, xmax=10)
 plt.ylim(ymin=-2, ymax=2)
 for data in dataset:
